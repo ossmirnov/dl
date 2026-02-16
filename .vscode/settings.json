@@ -3,7 +3,7 @@
     "editor.wordWrapColumn": 120,
     "notebook.output.wordWrap": true,
     "cursorpyright.analysis.typeCheckingMode": "basic",
-    "python.languageServer": "None",
+    "python.languageServer": "Pylance",
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
     },
@@ -12,4 +12,5 @@
     "editor.unicodeHighlight.includeStrings": false,
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 1000,
+    "claudeCode.preferredLocation": "sidebar",
 }

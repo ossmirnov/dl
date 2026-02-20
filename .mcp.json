@@ -1,11 +1,15 @@
 {
   "mcpServers": {
-    "sqlite": {
+    "dbhub": {
+      "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
-        "mcp-server-sqlite-npx",
-        "./db-agent/data/data.db"
+        "@bytebase/dbhub@latest",
+        "--transport",
+        "stdio",
+        "--dsn",
+        "postgresql:///db_agent_data"
       ]
     }
   }

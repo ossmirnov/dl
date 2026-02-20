@@ -3,7 +3,7 @@
     "editor.wordWrapColumn": 120,
     "notebook.output.wordWrap": true,
     "cursorpyright.analysis.typeCheckingMode": "basic",
-    "python.languageServer": "Pylance",
+    "python.languageServer": "None",
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
     },

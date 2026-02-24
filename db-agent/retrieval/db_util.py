@@ -2,8 +2,10 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 from sqlalchemy import MetaData, create_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-DSN = 'postgresql:///db_agent_data'
+DSN = 'postgresql://readonly@localhost/db_agent_data'
+ASYNC_DSN = 'postgresql+asyncpg://readonly@localhost/db_agent_data'
 
 DB_CONFIG_PATH = Path(__file__).parent / '../data/db_config.json'
 
@@ -28,4 +30,12 @@ def reflect_db(dsn: str):
     engine = create_engine(dsn, pool_size=20, max_overflow=0)
     metadata = MetaData()
     metadata.reflect(bind=engine)
+    return engine, metadata
+
+
+async def async_reflect_db(dsn: str = ASYNC_DSN) -> tuple[AsyncEngine, MetaData]:
+    engine = create_async_engine(dsn, pool_size=20, max_overflow=0)
+    metadata = MetaData()
+    async with engine.connect() as conn:
+        await conn.run_sync(metadata.reflect)
     return engine, metadata

@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import asyncio
 from typing import Annotated
+
 import typer
 import yaml
-from sqlalchemy import Engine, Table, select
+from sqlalchemy import MetaData, Table, select
+from sqlalchemy.ext.asyncio import AsyncEngine
 
-from db_util import DEFAULT_DB_CONFIG, DSN, DatabaseConfig, reflect_db
+from db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
 from organize_rows import organize_rows
 
 
-def _query_table(
-    engine: Engine,
+async def _query_table(
+    engine: AsyncEngine,
     table: Table,
     phone_number: int,
     cfg: DatabaseConfig,
 ) -> tuple[str | None, object | None]:
     cols = [c for c in table.columns if c.name not in cfg.ignore_cols]
     stmt = select(*cols).where(table.c.phone_number == phone_number)
-    with engine.connect() as conn:
-        raw = [dict(row) for row in conn.execute(stmt).mappings()]
+    async with engine.connect() as conn:
+        raw = [dict(row) for row in (await conn.execute(stmt)).mappings()]
     if not raw:
         return None, None
     prefix = f'{table.name}_'
@@ -29,33 +31,35 @@ def _query_table(
     )
 
 
-def filter_by_phone(
+async def filter_by_phone(
     phone_number: int,
     *,
-    dsn: str = DSN,
+    dsn: str = ASYNC_DSN,
+    engine: AsyncEngine | None = None,
+    metadata: MetaData | None = None,
     db_config: DatabaseConfig | None = None,
 ) -> dict[str, object]:
     cfg = db_config or DEFAULT_DB_CONFIG
-    engine, metadata = reflect_db(dsn)
-    tables = [t for t in metadata.sorted_tables if 'phone_number' in t.columns]
-    results: dict[str, object] = {}
-    with ThreadPoolExecutor(max_workers=len(tables) or 1) as executor:
-        futures = {executor.submit(_query_table, engine, t, phone_number, cfg): t for t in tables}
-        for future in as_completed(futures):
-            name, data = future.result()
-            if name is not None:
-                results[name] = data
-    return dict(sorted(results.items()))
+    if engine is None or metadata is None:
+        _engine, _metadata = await async_reflect_db(dsn)
+        own_engine = True
+    else:
+        _engine, _metadata, own_engine = engine, metadata, False
+    tables = [t for t in _metadata.sorted_tables if 'phone_number' in t.columns]
+    results_list = await asyncio.gather(*[_query_table(_engine, t, phone_number, cfg) for t in tables])
+    if own_engine:
+        await _engine.dispose()
+    return dict(sorted((n, d) for n, d in results_list if n is not None))
 
 
 def filter_by_phone_and_print(
     phone_number: int,
-    dsn: str = DSN,
+    dsn: str = ASYNC_DSN,
     db_config: Annotated[
         DatabaseConfig | None, typer.Option(parser=DatabaseConfig.model_validate_json)
     ] = None,
 ) -> None:
-    results = filter_by_phone(phone_number, dsn=dsn, db_config=db_config)
+    results = asyncio.run(filter_by_phone(phone_number, dsn=dsn, db_config=db_config))
     print(yaml.dump(results, allow_unicode=True, default_flow_style=False, sort_keys=False))
 
 

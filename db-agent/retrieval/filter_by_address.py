@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
+import asyncio
 import re
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Annotated, Optional
 
 import typer
 import yaml
-from sqlalchemy import Engine, Table, func, literal, select, text
+from sqlalchemy import MetaData, Table, func, literal, select, text
+from sqlalchemy.ext.asyncio import AsyncEngine
 
-from db_util import DEFAULT_DB_CONFIG, DSN, DatabaseConfig, reflect_db
+from db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
 from organize_rows import organize_rows
 
 _city_prefix = re.compile(
@@ -75,8 +76,8 @@ def _normalize_address_query(
     return ' '.join(tokens) or None
 
 
-def _query_table(
-    engine: Engine,
+async def _query_table(
+    engine: AsyncEngine,
     table: Table,
     norm_city: str,
     norm_street: str,
@@ -97,8 +98,8 @@ def _query_table(
         stmt = select(*table.columns, sim.label('_sim')).where(
             table.c.address_norm.op('%')(literal(norm_query))
         )
-        with engine.connect() as conn:
-            rows = conn.execute(stmt).mappings().all()
+        async with engine.connect() as conn:
+            rows = (await conn.execute(stmt)).mappings().all()
         return [
             {
                 **{str(k): v for k, v in row.items() if str(k) not in skip},
@@ -133,9 +134,9 @@ def _query_table(
             .where(table.c.address_house == norm_house)
             .where(table.c.address_street.op('%')(literal(norm_street)))
         )
-    with engine.connect() as conn:
-        conn.execute(text('SET LOCAL pg_trgm.similarity_threshold = 0.45'))
-        rows = conn.execute(stmt).mappings().all()
+    async with engine.begin() as conn:
+        await conn.execute(text('SET LOCAL pg_trgm.similarity_threshold = 0.45'))
+        rows = (await conn.execute(stmt)).mappings().all()
     return [
         {
             **{str(k): v for k, v in row.items() if str(k) not in skip},
@@ -146,13 +147,15 @@ def _query_table(
     ]
 
 
-def filter_by_address(
+async def filter_by_address(
     city: str,
     street: str,
     house: str,
     apartment: str | None = None,
     *,
-    dsn: str = DSN,
+    dsn: str = ASYNC_DSN,
+    engine: AsyncEngine | None = None,
+    metadata: MetaData | None = None,
     limit: int | None = 5,
     tolerance: float = 1e-4,
     db_config: DatabaseConfig | None = None,
@@ -167,31 +170,28 @@ def filter_by_address(
     if not norm_city or not norm_street or not norm_house:
         return []
 
-    engine, metadata = reflect_db(dsn)
+    if engine is None or metadata is None:
+        _engine, _metadata = await async_reflect_db(dsn)
+        own_engine = True
+    else:
+        _engine, _metadata, own_engine = engine, metadata, False
+
     tables = [
         t
-        for t in metadata.sorted_tables
+        for t in _metadata.sorted_tables
         if {'address_city', 'address_norm'} & {c.name for c in t.columns}
     ]
 
+    results_list = await asyncio.gather(*[
+        _query_table(_engine, t, norm_city, norm_street, norm_house, norm_apt, norm_query, cfg)
+        for t in tables
+    ])
+    if own_engine:
+        await _engine.dispose()
+
     all_rows: list[dict] = []
-    with ThreadPoolExecutor(max_workers=len(tables) or 1) as executor:
-        futures = {
-            executor.submit(
-                _query_table,
-                engine,
-                t,
-                norm_city,
-                norm_street,
-                norm_house,
-                norm_apt,
-                norm_query,
-                cfg,
-            ): t
-            for t in tables
-        }
-        for future in as_completed(futures):
-            all_rows.extend(future.result())
+    for rows in results_list:
+        all_rows.extend(rows)
 
     by_phone: dict[int, list[dict]] = defaultdict(list)
     for row in all_rows:
@@ -232,14 +232,14 @@ def filter_by_address_and_print(
     street: str,
     house: str,
     apartment: Annotated[Optional[str], typer.Argument()] = None,
-    dsn: str = DSN,
+    dsn: str = ASYNC_DSN,
     limit: Annotated[Optional[int], typer.Option()] = 5,
     db_config: Annotated[
         DatabaseConfig | None, typer.Option(parser=DatabaseConfig.model_validate_json)
     ] = None,
     tolerance: Annotated[float, typer.Option()] = 1e-4,
 ) -> None:
-    results = filter_by_address(
+    results = asyncio.run(filter_by_address(
         city,
         street,
         house,
@@ -248,7 +248,7 @@ def filter_by_address_and_print(
         limit=limit,
         tolerance=tolerance,
         db_config=db_config,
-    )
+    ))
     print(yaml.dump(results, allow_unicode=True, default_flow_style=False, sort_keys=False))
 
 

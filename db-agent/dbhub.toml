@@ -1,0 +1,9 @@
+[[sources]]
+id = "database"
+dsn = "postgresql:///db_agent_data"
+
+[[tools]]
+name = "execute_sql"
+source = "database"
+readonly = true
+max_rows = 200

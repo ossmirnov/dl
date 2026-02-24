@@ -6,10 +6,8 @@
       "args": [
         "-y",
         "@bytebase/dbhub@latest",
-        "--transport",
-        "stdio",
-        "--dsn",
-        "postgresql:///db_agent_data"
+        "--config",
+        "dbhub.toml"
       ]
     }
   }

@@ -6,6 +6,8 @@ ${DATABASE_DESCRIPTION}
 
 Perform a thorough search. Summarize all your findings related to the question, and more information if can be helpful.
 
+By default, respond in Russian.
+
 # Formatting
 
 To highlight with bold, use CSS tags <b>text</b>. For italics, use <i>text</i>. Do NOT use **this**.

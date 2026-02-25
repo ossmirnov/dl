@@ -6,6 +6,7 @@ load_dotenv(Path(__file__).parent.parent / '.env')
 
 import logging
 import os
+from datetime import datetime
 
 import litellm
 from agents import set_trace_processors
@@ -18,7 +19,17 @@ from .db import ensure_db
 from .handlers import register_handlers
 from .search import init_retrieval
 
-logging.basicConfig(level=logging.INFO)
+_log_dir = Path(__file__).parent / 'log'
+_log_dir.mkdir(exist_ok=True)
+_log_file = _log_dir / f'{datetime.now().strftime("%Y-%m-%dT%H.%M.%S.%f")}.log'
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler(_log_file),
+    ],
+)
 logging.getLogger('mcp.os.posix.utilities').setLevel(logging.ERROR)
 litellm.suppress_debug_info = True
 
@@ -26,7 +37,7 @@ os.environ['OPIK_PROJECT_NAME'] = 'db-agent-bot'
 set_trace_processors(processors=[OpikTracingProcessor()])
 
 
-async def _post_init(app: Application) -> None:
+async def _post_init(_app: Application) -> None:
     await _ensure_osint_db()
     await ensure_db()
     await init_retrieval()

@@ -73,4 +73,5 @@ async def _reply_html_or_plain(msg: Message, text: str) -> Message:
     try:
         return await msg.reply_text(text, parse_mode=ParseMode.HTML)
     except BadRequest:
+        logger.warning('HTML reply failed, falling back to plain text (chat_id=%d): %r', msg.chat_id, text)
         return await msg.reply_text(text)

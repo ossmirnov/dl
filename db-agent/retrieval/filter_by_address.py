@@ -9,8 +9,8 @@ import yaml
 from sqlalchemy import MetaData, Table, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
-from organize_rows import organize_rows
+from retrieval.db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
+from retrieval.organize_rows import organize_rows
 
 _city_prefix = re.compile(
     r'^(г\.?\s+|город\s+|пос\.?\s+|посёлок\s+|поселок\s+|п\.\s*|с\.\s+|село\s+|деревня\s+|дер\.\s+|рп\.\s+)',

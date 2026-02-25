@@ -12,6 +12,9 @@
 - Check typing with `pyright`.
 - Add packages to `requirements.txt` with their newest version. Run `pip install -r requirements.txt`.
 
+## Unit tests
+- For isolated functions with complex logic, write `pytest` comprehensive unit tests in a test/ subfolder.
+
 ## SQL Best Practices
 - Write performant, production-grade PostgreSQL queries.
 - Leverage **PostgreSQL-specific features** - window functions, LATERAL joins, FILTER clauses, functions, etc.

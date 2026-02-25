@@ -6,8 +6,8 @@
       "args": [
         "-y",
         "@bytebase/dbhub@latest",
-        "--config",
-        "dbhub.toml"
+        "--dsn",
+        "postgresql:///db_agent_history"
       ]
     }
   }

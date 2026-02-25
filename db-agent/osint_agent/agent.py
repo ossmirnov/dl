@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from string import Template
 
@@ -15,10 +16,9 @@ from agents.extensions.models.litellm_model import LitellmModel
 from agents.mcp import MCPServerStdio
 from pydantic import BaseModel, Field
 
-from session import PostgresSession
+from osint_agent.session import PostgresSession
 
 PROJECT_ROOT = Path(__file__).parent.parent
-RETRIEVAL_DIR = PROJECT_ROOT / 'retrieval'
 
 litellm_model = LitellmModel(
     model='openrouter/google/gemini-3-flash-preview',
@@ -72,7 +72,9 @@ def get_retrieval_server():
     return MCPServerStdio(
         name='retrieval',
         params={
-            'command': str(RETRIEVAL_DIR / 'mcp_server.py'),
+            'command': sys.executable,
+            'args': ['-m', 'retrieval.mcp_server'],
+            'cwd': str(PROJECT_ROOT),
         },
         client_session_timeout_seconds=120,
     )

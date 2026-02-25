@@ -7,8 +7,8 @@ import yaml
 from sqlalchemy import Column, ColumnElement, MetaData, Table, or_, select
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
-from organize_rows import organize_rows
+from retrieval.db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
+from retrieval.organize_rows import organize_rows
 
 
 def _norm(s: str) -> str:

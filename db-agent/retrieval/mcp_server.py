@@ -5,11 +5,11 @@ from typing import Any
 import json
 from mcp.server.fastmcp import Context, FastMCP
 
-from db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, async_reflect_db
-from filter_by_address import filter_by_address as _filter_by_address
-from filter_by_email import filter_by_email as _filter_by_email
-from filter_by_name import filter_by_name as _filter_by_name
-from filter_by_phone import filter_by_phone as _filter_by_phone
+from retrieval.db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, async_reflect_db
+from retrieval.filter_by_address import filter_by_address as _filter_by_address
+from retrieval.filter_by_email import filter_by_email as _filter_by_email
+from retrieval.filter_by_name import filter_by_name as _filter_by_name
+from retrieval.filter_by_phone import filter_by_phone as _filter_by_phone
 
 
 @asynccontextmanager

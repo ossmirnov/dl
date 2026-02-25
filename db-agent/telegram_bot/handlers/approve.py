@@ -39,5 +39,5 @@ async def handle_approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         sent = await msg.reply_text(STRINGS.approve.approved_by_username.format(username=m.group(1)))
         await save_message(sent)
     else:
-        sent = await msg.reply_text(STRINGS.approve.invalid_format)
+        sent = await msg.reply_text(STRINGS.approve.usage)
         await save_message(sent)

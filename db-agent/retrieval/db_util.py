@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-DATA_DSN = 'postgresql+asyncpg://readonly@localhost:5433/db_agent_data'
+DATA_DSN = 'postgresql+asyncpg://readonly@127.0.0.1:5433/db_agent_data'
 
 DB_CONFIG_PATH = Path(__file__).parent / '../data/db_config.json'
 

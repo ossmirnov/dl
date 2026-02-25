@@ -5,8 +5,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.schema import DDL
 
-POSTGRES_DSN = 'postgresql+asyncpg://postgres@localhost:5432/postgres'
-HISTORY_DSN = 'postgresql+asyncpg://postgres@localhost:5432/db_agent_history'
+POSTGRES_DSN = 'postgresql+asyncpg://postgres@127.0.0.1:5432/postgres'
+HISTORY_DSN = 'postgresql+asyncpg://postgres@127.0.0.1:5432/db_agent_history'
 
 _metadata = MetaData()
 

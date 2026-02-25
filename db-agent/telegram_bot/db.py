@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from telegram import Message, User
 
-_HISTORY_DSN = 'postgresql+asyncpg://localhost/db_agent_history'
+_HISTORY_DSN = 'postgresql+asyncpg://postgres@localhost:5432/db_agent_history'
 
 _metadata = MetaData()
 

@@ -6,10 +6,9 @@ from telegram.ext import ContextTypes
 
 from ..config import ADMIN_ID
 from ..db import is_approved, save_message
+from ..interface import STRINGS
 from ..patterns import parse_address, parse_email, parse_name, parse_phone
 from ..search import search_address, search_email, search_name, search_phone, to_yaml
-
-_NOTHING_FOUND = 'Nothing found 👀'
 
 
 async def handle_find(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -22,17 +21,17 @@ async def handle_find(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     query = ' '.join(context.args or [])
     if not query:
-        sent = await msg.reply_text('Usage: /find <phone|email|name|address>')
+        sent = await msg.reply_text(STRINGS.find.usage)
         await save_message(sent)
         return
 
     result = await _try_pattern_match(query)
     if result is None:
-        sent = await msg.reply_text('Unrecognized format 🤷‍♂️')
+        sent = await msg.reply_text(STRINGS.find.unrecognized_format)
         await save_message(sent)
         return
 
-    reply = f'<pre>{html.escape(to_yaml(result))}</pre>' if result else _NOTHING_FOUND
+    reply = f'<pre>{html.escape(to_yaml(result))}</pre>' if result else STRINGS.find.nothing_found
     sent = await msg.reply_text(reply, parse_mode=ParseMode.HTML)
     await save_message(sent)
 

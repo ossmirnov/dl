@@ -9,6 +9,7 @@ from telegram.ext import ContextTypes
 from osint_agent.agent import run_osint
 from ..config import ADMIN_ID
 from ..db import is_approved, mark_message_deleted, save_message
+from ..interface import STRINGS
 from ..notify import notify_admin
 from ..tg_session import get_session_id
 
@@ -22,7 +23,7 @@ async def handle_unknown_command(update: Update, context: ContextTypes.DEFAULT_T
     user = msg.from_user
     if user.id != ADMIN_ID and not await is_approved(user.id, user.username):
         return
-    reply = await msg.reply_text('Unknown command 🤷‍♂️')
+    reply = await msg.reply_text(STRINGS.unknown_command)
     await save_message(reply)
 
 
@@ -48,9 +49,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         logger.exception('Agent error for user %d', user.id)
         await notify_admin(
             context.bot,
-            f'❌ Agent error\n👤 {user.full_name} ({user.id})\n💬 {text}',
+            STRINGS.message.admin_error_report.format(full_name=user.full_name, user_id=user.id, text=text),
         )
-        sent = await msg.reply_text('Something is broken! 🔧')
+        sent = await msg.reply_text(STRINGS.message.error)
         await save_message(sent)
 
 
@@ -60,7 +61,7 @@ async def _invoke_agent(msg: Message, text: str, session_id: str) -> str:
         return await asyncio.wait_for(asyncio.shield(task), timeout=10)
     except asyncio.TimeoutError:
         pass
-    wait_msg = await msg.reply_text('Working hard, please wait... 🔍')
+    wait_msg = await msg.reply_text(STRINGS.message.working_hard)
     await save_message(wait_msg)
     try:
         return await task

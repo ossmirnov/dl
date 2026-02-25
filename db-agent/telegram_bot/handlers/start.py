@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 from ..config import ADMIN_ID
 from ..db import is_approved, save_message
+from ..interface import STRINGS
 
 
 async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -12,5 +13,5 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     user = msg.from_user
     if user.id != ADMIN_ID and not await is_approved(user.id, user.username):
         return
-    reply = await msg.reply_text('Hey! 👋')
+    reply = await msg.reply_text(STRINGS.start.greeting)
     await save_message(reply)

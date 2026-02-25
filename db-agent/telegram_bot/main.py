@@ -17,6 +17,7 @@ from telegram.ext import Application
 from .config import TOKEN
 from .db import ensure_db
 from .handlers import register_handlers
+from .notify import TelegramErrorHandler
 from .search import init_retrieval
 
 _log_dir = Path(__file__).parent / 'log'
@@ -45,6 +46,7 @@ async def _post_init(_app: Application) -> None:
 
 def main() -> None:
     app = Application.builder().token(TOKEN).post_init(_post_init).build()
+    logging.getLogger().addHandler(TelegramErrorHandler(app.bot))
     register_handlers(app)
     app.run_polling()
 

@@ -35,7 +35,7 @@ logging.basicConfig(
     ],
 )
 logging.getLogger('mcp.os.posix.utilities').setLevel(logging.ERROR)
-logging.getLogger('opik').setLevel(logging.DEBUG)
+logging.getLogger('opik').propagate = True
 litellm.suppress_debug_info = True
 
 os.environ['OPIK_PROJECT_NAME'] = 'db-agent-bot'

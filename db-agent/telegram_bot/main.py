@@ -23,6 +23,9 @@ from .search import init_retrieval
 _log_dir = Path(__file__).parent / 'log'
 _log_dir.mkdir(exist_ok=True)
 _log_file = _log_dir / f'{datetime.now().strftime("%Y-%m-%dT%H.%M.%S.%f")}.log'
+_log_latest = _log_dir / 'latest'
+_log_latest.unlink(missing_ok=True)
+_log_latest.symlink_to(_log_file.name)
 
 logging.basicConfig(
     level=logging.INFO,

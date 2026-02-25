@@ -10,7 +10,7 @@ from osint_agent.agent import run_osint
 from ..config import ADMIN_ID
 from ..db import is_approved, mark_message_deleted, save_message
 from ..interface import STRINGS
-from ..notify import notify_admin
+from ..notify import notify_admin, split_by_newlines
 from ..tg_session import get_session_id
 
 logger = logging.getLogger(__name__)
@@ -43,8 +43,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     session_id = await get_session_id(msg.chat_id)
     try:
         response = await _invoke_agent(msg, text, session_id)
-        sent = await _reply_html_or_plain(msg, response)
-        await save_message(sent)
+        for sent in await _reply_html_or_plain(msg, response):
+            await save_message(sent)
     except Exception:
         logger.exception('Agent error for user %d', user.id)
         await notify_admin(
@@ -70,9 +70,13 @@ async def _invoke_agent(msg: Message, text: str, session_id: str) -> str:
         await mark_message_deleted(wait_msg.chat_id, wait_msg.message_id)
 
 
-async def _reply_html_or_plain(msg: Message, text: str) -> Message:
-    try:
-        return await msg.reply_text(text, parse_mode=ParseMode.HTML)
-    except BadRequest:
-        logger.warning('HTML reply failed, falling back to plain text (chat_id=%d): %r', msg.chat_id, text)
-        return await msg.reply_text(text)
+async def _reply_html_or_plain(msg: Message, text: str) -> list[Message]:
+    messages = []
+    for part in split_by_newlines(text):
+        try:
+            sent = await msg.reply_text(part, parse_mode=ParseMode.HTML)
+        except BadRequest:
+            logger.warning('HTML reply failed, falling back to plain text (chat_id=%d): %r', msg.chat_id, part)
+            sent = await msg.reply_text(part)
+        messages.append(sent)
+    return messages

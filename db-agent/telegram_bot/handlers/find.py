@@ -7,6 +7,7 @@ from telegram.ext import ContextTypes
 from ..config import ADMIN_ID
 from ..db import is_approved, save_message
 from ..interface import STRINGS
+from ..notify import split_by_newlines
 from ..patterns import parse_address, parse_email, parse_name, parse_phone
 from ..search import search_address, search_email, search_name, search_phone, to_yaml
 
@@ -31,9 +32,14 @@ async def handle_find(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await save_message(sent)
         return
 
-    reply = f'<pre>{html.escape(to_yaml(result))}</pre>' if result else STRINGS.find.nothing_found
-    sent = await msg.reply_text(reply, parse_mode=ParseMode.HTML)
-    await save_message(sent)
+    if not result:
+        sent = await msg.reply_text(STRINGS.find.nothing_found)
+        await save_message(sent)
+        return
+
+    for part in split_by_newlines(to_yaml(result)):
+        sent = await msg.reply_text(f'<pre>{html.escape(part)}</pre>', parse_mode=ParseMode.HTML)
+        await save_message(sent)
 
 
 async def _try_pattern_match(text: str) -> dict | list | None:

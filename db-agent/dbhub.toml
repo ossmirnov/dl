@@ -1,6 +1,6 @@
 [[sources]]
 id = "database"
-dsn = "postgresql://readonly@localhost/db_agent_data"
+dsn = "postgresql://readonly@localhost:5433/db_agent_data"
 
 [[tools]]
 name = "execute_sql"

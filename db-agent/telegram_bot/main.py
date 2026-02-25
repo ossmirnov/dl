@@ -42,8 +42,11 @@ litellm.suppress_debug_info = True
 
 from opik import track
 
-with track('linux-manual-test'):  # type: ignore
+@track(name='linux-manual-test')
+def test():
     print('manual trace')
+
+test()
 
 os.environ['OPIK_PROJECT_NAME'] = 'db-agent-bot'
 set_trace_processors(processors=[OpikTracingProcessor()])

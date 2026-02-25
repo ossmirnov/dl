@@ -16,6 +16,10 @@ from ..tg_session import get_session_id
 logger = logging.getLogger(__name__)
 
 
+async def handle_edited_message(_update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
+    pass
+
+
 async def handle_unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     assert update.message
     msg = update.message

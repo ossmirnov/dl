@@ -9,7 +9,7 @@ import yaml
 from sqlalchemy import MetaData, Table, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from retrieval.db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
+from retrieval.db_util import DATA_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
 from retrieval.organize_rows import organize_rows
 
 _city_prefix = re.compile(
@@ -153,7 +153,7 @@ async def filter_by_address(
     house: str,
     apartment: str | None = None,
     *,
-    dsn: str = ASYNC_DSN,
+    dsn: str = DATA_DSN,
     engine: AsyncEngine | None = None,
     metadata: MetaData | None = None,
     limit: int | None = 5,
@@ -182,10 +182,12 @@ async def filter_by_address(
         if {'address_city', 'address_norm'} & {c.name for c in t.columns}
     ]
 
-    results_list = await asyncio.gather(*[
-        _query_table(_engine, t, norm_city, norm_street, norm_house, norm_apt, norm_query, cfg)
-        for t in tables
-    ])
+    results_list = await asyncio.gather(
+        *[
+            _query_table(_engine, t, norm_city, norm_street, norm_house, norm_apt, norm_query, cfg)
+            for t in tables
+        ]
+    )
     if own_engine:
         await _engine.dispose()
 
@@ -232,23 +234,25 @@ def filter_by_address_and_print(
     street: str,
     house: str,
     apartment: Annotated[Optional[str], typer.Argument()] = None,
-    dsn: str = ASYNC_DSN,
+    dsn: str = DATA_DSN,
     limit: Annotated[Optional[int], typer.Option()] = 5,
     db_config: Annotated[
         DatabaseConfig | None, typer.Option(parser=DatabaseConfig.model_validate_json)
     ] = None,
     tolerance: Annotated[float, typer.Option()] = 1e-4,
 ) -> None:
-    results = asyncio.run(filter_by_address(
-        city,
-        street,
-        house,
-        apartment,
-        dsn=dsn,
-        limit=limit,
-        tolerance=tolerance,
-        db_config=db_config,
-    ))
+    results = asyncio.run(
+        filter_by_address(
+            city,
+            street,
+            house,
+            apartment,
+            dsn=dsn,
+            limit=limit,
+            tolerance=tolerance,
+            db_config=db_config,
+        )
+    )
     print(yaml.dump(results, allow_unicode=True, default_flow_style=False, sort_keys=False))
 
 

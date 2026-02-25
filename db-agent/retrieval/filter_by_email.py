@@ -7,7 +7,7 @@ import yaml
 from sqlalchemy import MetaData, Table, select
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from retrieval.db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
+from retrieval.db_util import DATA_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
 from retrieval.organize_rows import organize_rows
 
 
@@ -34,7 +34,7 @@ async def _query_table(
 async def filter_by_email(
     email: str,
     *,
-    dsn: str = ASYNC_DSN,
+    dsn: str = DATA_DSN,
     engine: AsyncEngine | None = None,
     metadata: MetaData | None = None,
     db_config: DatabaseConfig | None = None,
@@ -55,7 +55,7 @@ async def filter_by_email(
 
 def filter_by_email_and_print(
     email: str,
-    dsn: str = ASYNC_DSN,
+    dsn: str = DATA_DSN,
     db_config: Annotated[
         DatabaseConfig | None, typer.Option(parser=DatabaseConfig.model_validate_json)
     ] = None,

@@ -7,7 +7,7 @@ import yaml
 from sqlalchemy import MetaData, Table, select
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from retrieval.db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
+from retrieval.db_util import DATA_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
 from retrieval.organize_rows import organize_rows
 
 
@@ -34,7 +34,7 @@ async def _query_table(
 async def filter_by_phone(
     phone_number: int,
     *,
-    dsn: str = ASYNC_DSN,
+    dsn: str = DATA_DSN,
     engine: AsyncEngine | None = None,
     metadata: MetaData | None = None,
     db_config: DatabaseConfig | None = None,
@@ -46,7 +46,9 @@ async def filter_by_phone(
     else:
         _engine, _metadata, own_engine = engine, metadata, False
     tables = [t for t in _metadata.sorted_tables if 'phone_number' in t.columns]
-    results_list = await asyncio.gather(*[_query_table(_engine, t, phone_number, cfg) for t in tables])
+    results_list = await asyncio.gather(
+        *[_query_table(_engine, t, phone_number, cfg) for t in tables]
+    )
     if own_engine:
         await _engine.dispose()
     return dict(sorted((n, d) for n, d in results_list if n is not None))
@@ -54,7 +56,7 @@ async def filter_by_phone(
 
 def filter_by_phone_and_print(
     phone_number: int,
-    dsn: str = ASYNC_DSN,
+    dsn: str = DATA_DSN,
     db_config: Annotated[
         DatabaseConfig | None, typer.Option(parser=DatabaseConfig.model_validate_json)
     ] = None,

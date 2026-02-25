@@ -5,7 +5,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.schema import DDL
 
-HISTORY_DSN = 'postgresql+asyncpg://localhost/db_agent_history'
+POSTGRES_DSN = 'postgresql+asyncpg://postgres@localhost:5432/postgres'
+HISTORY_DSN = 'postgresql+asyncpg://postgres@localhost:5432/db_agent_history'
 
 _metadata = MetaData()
 
@@ -22,7 +23,7 @@ _session_items = Table(
 _engine: AsyncEngine | None = None
 
 
-def _get_engine() -> AsyncEngine:
+def get_engine() -> AsyncEngine:
     global _engine
     if _engine is None:
         _engine = create_async_engine(HISTORY_DSN, pool_size=5, max_overflow=0)
@@ -30,9 +31,7 @@ def _get_engine() -> AsyncEngine:
 
 
 async def ensure_db() -> None:
-    bootstrap = create_async_engine(
-        'postgresql+asyncpg://localhost/postgres', isolation_level='AUTOCOMMIT'
-    )
+    bootstrap = create_async_engine(POSTGRES_DSN, isolation_level='AUTOCOMMIT')
     async with bootstrap.connect() as conn:
         exists = await conn.scalar(
             select(_pg_database.c.datname).where(_pg_database.c.datname == 'db_agent_history')
@@ -41,7 +40,7 @@ async def ensure_db() -> None:
             await conn.execute(DDL('CREATE DATABASE db_agent_history'))
     await bootstrap.dispose()
 
-    async with _get_engine().begin() as conn:
+    async with get_engine().begin() as conn:
         await conn.run_sync(_metadata.create_all)
 
 
@@ -59,12 +58,12 @@ class PostgresSession:
         )
         if limit is not None:
             q = q.limit(limit)
-        async with _get_engine().connect() as conn:
+        async with get_engine().connect() as conn:
             rows = (await conn.execute(q)).fetchall()
         return [row.item for row in rows]
 
     async def add_items(self, items: list[TResponseInputItem]) -> None:
-        async with _get_engine().begin() as conn:
+        async with get_engine().begin() as conn:
             await conn.execute(
                 insert(_session_items),
                 [{'session_id': self.session_id, 'item': item} for item in items],
@@ -81,12 +80,12 @@ class PostgresSession:
             )
             .returning(_session_items.c.item)
         )
-        async with _get_engine().begin() as conn:
+        async with get_engine().begin() as conn:
             row = (await conn.execute(stmt)).fetchone()
         return row.item if row else None
 
     async def clear_session(self) -> None:
-        async with _get_engine().begin() as conn:
+        async with get_engine().begin() as conn:
             await conn.execute(
                 delete(_session_items).where(_session_items.c.session_id == self.session_id)
             )

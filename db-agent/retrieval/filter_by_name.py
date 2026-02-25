@@ -7,7 +7,7 @@ import yaml
 from sqlalchemy import Column, ColumnElement, MetaData, Table, or_, select
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-from retrieval.db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
+from retrieval.db_util import DATA_DSN, DEFAULT_DB_CONFIG, DatabaseConfig, async_reflect_db
 from retrieval.organize_rows import organize_rows
 
 
@@ -54,7 +54,7 @@ async def filter_by_name(
     first_name: str,
     patronymic: str | None = None,
     *,
-    dsn: str = ASYNC_DSN,
+    dsn: str = DATA_DSN,
     engine: AsyncEngine | None = None,
     metadata: MetaData | None = None,
     db_config: DatabaseConfig | None = None,
@@ -69,7 +69,9 @@ async def filter_by_name(
     else:
         _engine, _metadata, own_engine = engine, metadata, False
     tables = [t for t in _metadata.sorted_tables if 'name' in t.columns]
-    results_list = await asyncio.gather(*[_query_table(_engine, t, last, first, pat, cfg) for t in tables])
+    results_list = await asyncio.gather(
+        *[_query_table(_engine, t, last, first, pat, cfg) for t in tables]
+    )
     if own_engine:
         await _engine.dispose()
     return dict(sorted((n, d) for n, d in results_list if n is not None))
@@ -79,12 +81,14 @@ def filter_by_name_and_print(
     last_name: str,
     first_name: str,
     patronymic: Annotated[Optional[str], typer.Argument()] = None,
-    dsn: str = ASYNC_DSN,
+    dsn: str = DATA_DSN,
     db_config: Annotated[
         DatabaseConfig | None, typer.Option(parser=DatabaseConfig.model_validate_json)
     ] = None,
 ) -> None:
-    results = asyncio.run(filter_by_name(last_name, first_name, patronymic, dsn=dsn, db_config=db_config))
+    results = asyncio.run(
+        filter_by_name(last_name, first_name, patronymic, dsn=dsn, db_config=db_config)
+    )
     print(yaml.dump(results, allow_unicode=True, default_flow_style=False, sort_keys=False))
 
 

@@ -1,7 +1,7 @@
 import json
 
 import yaml
-from retrieval.db_util import ASYNC_DSN, DEFAULT_DB_CONFIG, async_reflect_db
+from retrieval.db_util import DATA_DSN, DEFAULT_DB_CONFIG, async_reflect_db
 from retrieval.filter_by_address import filter_by_address as _filter_by_address
 from retrieval.filter_by_email import filter_by_email as _filter_by_email
 from retrieval.filter_by_name import filter_by_name as _filter_by_name
@@ -15,7 +15,7 @@ _metadata: MetaData | None = None
 
 async def init_retrieval() -> None:
     global _engine, _metadata
-    _engine, _metadata = await async_reflect_db(ASYNC_DSN)
+    _engine, _metadata = await async_reflect_db(DATA_DSN)
 
 
 def _db() -> tuple[AsyncEngine, MetaData]:
@@ -35,12 +35,16 @@ def to_yaml(data: object) -> str:
 
 async def search_phone(phone: int) -> dict:
     engine, metadata = _db()
-    return await _filter_by_phone(phone, engine=engine, metadata=metadata, db_config=DEFAULT_DB_CONFIG)
+    return await _filter_by_phone(
+        phone, engine=engine, metadata=metadata, db_config=DEFAULT_DB_CONFIG
+    )
 
 
 async def search_email(email: str) -> dict:
     engine, metadata = _db()
-    return await _filter_by_email(email, engine=engine, metadata=metadata, db_config=DEFAULT_DB_CONFIG)
+    return await _filter_by_email(
+        email, engine=engine, metadata=metadata, db_config=DEFAULT_DB_CONFIG
+    )
 
 
 async def search_name(last: str, first: str, patronymic: str) -> dict:
@@ -53,5 +57,11 @@ async def search_name(last: str, first: str, patronymic: str) -> dict:
 async def search_address(city: str, street: str, house: str, apartment: str | None) -> list:
     engine, metadata = _db()
     return await _filter_by_address(
-        city, street, house, apartment, engine=engine, metadata=metadata, db_config=DEFAULT_DB_CONFIG
+        city,
+        street,
+        house,
+        apartment,
+        engine=engine,
+        metadata=metadata,
+        db_config=DEFAULT_DB_CONFIG,
     )

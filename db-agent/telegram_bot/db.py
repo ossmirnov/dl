@@ -1,10 +1,20 @@
-from sqlalchemy import BigInteger, Boolean, Column, Index, MetaData, String, Table, func, select, update
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    Index,
+    MetaData,
+    String,
+    Table,
+    func,
+    select,
+    update,
+)
 from sqlalchemy import TIMESTAMP
 from sqlalchemy.dialects.postgresql import JSONB, insert
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from telegram import Message, User
 
-_HISTORY_DSN = 'postgresql+asyncpg://postgres@localhost:5432/db_agent_history'
+from osint_agent.session import get_engine
 
 _metadata = MetaData()
 
@@ -33,7 +43,11 @@ _telegram_messages = Table(
     Column('is_deleted', Boolean, nullable=False, server_default='false'),
 )
 
-Index('ix_telegram_messages_chat_new_session', _telegram_messages.c.chat_id, _telegram_messages.c.is_new_session)
+Index(
+    'ix_telegram_messages_chat_new_session',
+    _telegram_messages.c.chat_id,
+    _telegram_messages.c.is_new_session,
+)
 
 _approved_user_ids = Table(
     'approved_user_ids',
@@ -46,15 +60,6 @@ _approved_usernames = Table(
     _metadata,
     Column('username', String, primary_key=True),
 )
-
-_engine: AsyncEngine | None = None
-
-
-def get_engine() -> AsyncEngine:
-    global _engine
-    if _engine is None:
-        _engine = create_async_engine(_HISTORY_DSN, pool_size=5, max_overflow=0)
-    return _engine
 
 
 async def ensure_db() -> None:

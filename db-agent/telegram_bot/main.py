@@ -35,18 +35,8 @@ logging.basicConfig(
     ],
 )
 logging.getLogger('mcp.os.posix.utilities').setLevel(logging.ERROR)
-logging.getLogger('opik').setLevel(logging.DEBUG)
-logging.getLogger('opik').addHandler(logging.StreamHandler())
 logging.getLogger('opik').propagate = True
 litellm.suppress_debug_info = True
-
-from opik import track
-
-@track(name='linux-manual-test')
-def test():
-    print('manual trace')
-
-test()
 
 os.environ['OPIK_PROJECT_NAME'] = 'db-agent-bot'
 set_trace_processors(processors=[OpikTracingProcessor()])

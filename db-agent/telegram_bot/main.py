@@ -40,6 +40,10 @@ logging.getLogger('opik').addHandler(logging.StreamHandler())
 logging.getLogger('opik').propagate = True
 litellm.suppress_debug_info = True
 
+from opik import track
+
+with track('linux-manual-test'):  # type: ignore
+    print('manual trace')
 
 os.environ['OPIK_PROJECT_NAME'] = 'db-agent-bot'
 set_trace_processors(processors=[OpikTracingProcessor()])

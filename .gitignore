@@ -1,6 +1,9 @@
 # Log alias
 **/log/latest
 
+# Localization
+interface.local.yaml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

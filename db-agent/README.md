@@ -1,3 +1,9 @@
+# OSINT Agent
+
+- I implemented an investigator agent that searches for information in an attached database, identifying patterns and connections.
+- Uses pre-implemented search tools, plus an MCP server for **arbitrary PostgreSQL queries**.
+- Wrapped an agent in a **telegram bot**.
+
 # Multi-Agent System
 
 - I created a [calendar agent](./calendar-warm-up.ipynb) using [OpenAI Agent SDK](https://openai.github.io/openai-agents-python/agents/) and an open-source [MCP Server](https://github.com/nspady/google-calendar-mcp).

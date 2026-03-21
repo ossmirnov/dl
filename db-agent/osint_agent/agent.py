@@ -87,7 +87,7 @@ def get_dbhub_server():
             'command': 'npx',
             'args': ['-y', '@bytebase/dbhub@latest', '--config', str(PROJECT_ROOT / 'dbhub.toml')],
         },
-        client_session_timeout_seconds=60,
+        client_session_timeout_seconds=20,
     )
 
 

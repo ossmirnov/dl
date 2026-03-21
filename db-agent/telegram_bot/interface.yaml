@@ -1,19 +1,20 @@
-unknown_command: "Неизвестная команда 🤷‍♂️"
+unknown_command: "Unknown command 🤷‍♂️"
 
 start:
-  greeting: "Привет! 👋"
+  greeting: "Hey! 👋"
 
 message:
-  working_hard: "Работаю, ещё немного... 🔍"
-  error: "Что-то сломалось — уже чиним! 🔧"
-  admin_error_report: "❌ Ошибка агента\n👤 {full_name} ({user_id})\n💬 {text}"
+  working_hard: "Working hard, please wait... 🔍"
+  error: "Something is broken! 🔧"
+  admin_error_report: "❌ Agent error\n👤 {full_name} ({user_id})\n💬 {text}"
 
 find:
-  usage: "Формат: /find <телефон|email|имя|адрес>"
-  unrecognized_format: "Неверный формат 🤷‍♂️"
-  nothing_found: "Пустота 👀"
+  usage: "Usage: /find <phone|email|name|address>"
+  unrecognized_format: "Unrecognized format 🤷‍♂️"
+  nothing_found: "Nothing found 👀"
 
 approve:
-  usage: "Формат: /approve @username или /approve user_id"
-  approved_by_id: "Пользователь {target} одобрен ✅"
-  approved_by_username: "@{username} одобрен ✅"
+  usage: "Usage: /approve @username or /approve user_id"
+  approved_by_id: "Approved user {target} ✅"
+  approved_by_username: "Approved @{username} ✅"
+  invalid_format: "Invalid format. Use /approve @username or /approve user_id"

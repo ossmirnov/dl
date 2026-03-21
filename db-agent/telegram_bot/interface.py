@@ -24,6 +24,7 @@ class ApproveStrings(BaseModel):
     usage: str
     approved_by_id: str
     approved_by_username: str
+    invalid_format: str
 
 
 class Strings(BaseModel):

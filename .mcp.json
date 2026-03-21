@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "dbhub": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@bytebase/dbhub@latest",
+        "--dsn",
+        "postgresql:///db_agent_history"
+      ]
+    }
+  }
+}

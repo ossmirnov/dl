@@ -12,4 +12,5 @@
     "editor.unicodeHighlight.includeStrings": false,
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 1000,
+    "claudeCode.preferredLocation": "sidebar",
 }

@@ -22,6 +22,6 @@ createForm.addEventListener('submit', async (e) => {
 
 joinForm.addEventListener('submit', (e) => {
   e.preventDefault();
-  const id = roomIdInput.value.trim();
+  const id = roomIdInput.value.trim().toUpperCase();
   if (id) window.location.href = `/room/${id}`;
 });

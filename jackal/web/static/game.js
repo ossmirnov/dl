@@ -54,7 +54,7 @@ const KEY_DIR = {
 
 const DELTA = {up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1]};
 
-const roomId = window.location.pathname.split('/').pop();
+const roomId = window.location.pathname.split('/').pop().toUpperCase();
 document.getElementById('room-id-tag').textContent = roomId;
 
 const canvas = document.getElementById('board');

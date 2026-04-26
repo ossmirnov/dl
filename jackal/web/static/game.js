@@ -68,6 +68,9 @@ const elBalBlue = document.getElementById('bal-blue');
 const elAbRed = document.getElementById('ab-red');
 const elAbBlue = document.getElementById('ab-blue');
 const elTurnArrow = document.getElementById('turn-arrow');
+const elTurnText = document.getElementById('turn-text');
+const elDotRed = document.getElementById('dot-red');
+const elDotBlue = document.getElementById('dot-blue');
 const elBanner = document.getElementById('banner');
 const elRematch = document.getElementById('rematch');
 const elLog = document.getElementById('log');
@@ -162,6 +165,7 @@ function onState(s) {
   elAbRed.textContent = s.players.red.abilities.join(' ');
   elAbBlue.textContent = s.players.blue.abilities.join(' ');
   elTurnArrow.classList.toggle('flip', s.turn === 'blue');
+  updateTurnStatus(s);
   if (s.winner) {
     elBanner.textContent = `${s.winner} wins!`;
     elBanner.classList.remove('hidden');
@@ -181,6 +185,27 @@ function onState(s) {
     }
   }
   draw();
+}
+
+function updateTurnStatus(s) {
+  elDotRed.classList.remove('active');
+  elDotBlue.classList.remove('active');
+  elTurnText.classList.remove('you', 'win');
+  if (s.winner) {
+    elTurnText.textContent = me === s.winner ? 'you win!' : `${s.winner} wins`;
+    elTurnText.classList.add('win');
+    return;
+  }
+  const activeDot = s.turn === 'red' ? elDotRed : elDotBlue;
+  activeDot.classList.add('active');
+  if (me === 'spectator' || !me) {
+    elTurnText.textContent = `${s.turn}'s turn`;
+  } else if (me === s.turn) {
+    elTurnText.textContent = 'your turn';
+    elTurnText.classList.add('you');
+  } else {
+    elTurnText.textContent = 'waiting for opponent';
+  }
 }
 
 function animateTo(color, target, prev) {

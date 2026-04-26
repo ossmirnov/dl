@@ -124,15 +124,15 @@ def test_wizard_cascades_one_level():
         },
         red_pos=(5, 4),
     )
-    state.players[Color.BLUE].balance = 5
+    state.players[Color.BLUE].balance = 60
     state.grid[5][4].is_open = True
     apply_move(state, color=Color.RED, direction=Direction.RIGHT)
     assert state.grid[4][5].is_open
     assert state.grid[5][6].is_open
     assert state.grid[6][5].is_open
     assert state.grid[5][4].is_open
-    assert state.players[Color.RED].balance >= 1
-    assert state.players[Color.BLUE].balance == 4
+    assert state.players[Color.RED].balance >= 20
+    assert state.players[Color.BLUE].balance == 40
 
 
 def test_off_board_rejected():

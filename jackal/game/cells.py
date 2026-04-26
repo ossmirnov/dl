@@ -80,9 +80,10 @@ def _teleport(ctx: EffectCtx) -> list[Position]:
 def _thief(ctx: EffectCtx) -> list[Position]:
     me = ctx.players[ctx.actor]
     other = ctx.players[opponent(ctx.actor)]
-    if other.balance > 0:
-        other.balance -= 1
-        me.balance += 1
+    amount = other.balance // 3
+    if amount > 0:
+        other.balance -= amount
+        me.balance += amount
     return []
 
 

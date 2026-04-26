@@ -90,13 +90,22 @@ def test_teleport_avoids_stones():
         assert state.players[Color.RED].pos == (6, 5)
 
 
-def test_thief_transfers_one_coin():
+def test_thief_takes_third_rounded_down():
     pos = (2, 2)
     state = make_state(cells={pos: CellType.THIEF}, red_pos=pos)
-    state.players[Color.BLUE].balance = 5
+    state.players[Color.BLUE].balance = 50
     apply_effect(_ctx_at(state, actor=Color.RED, pos=pos))
-    assert state.players[Color.RED].balance == 1
-    assert state.players[Color.BLUE].balance == 4
+    assert state.players[Color.RED].balance == 16
+    assert state.players[Color.BLUE].balance == 34
+
+
+def test_thief_rounds_down_small():
+    pos = (2, 2)
+    state = make_state(cells={pos: CellType.THIEF}, red_pos=pos)
+    state.players[Color.BLUE].balance = 2
+    apply_effect(_ctx_at(state, actor=Color.RED, pos=pos))
+    assert state.players[Color.RED].balance == 0
+    assert state.players[Color.BLUE].balance == 2
 
 
 def test_thief_floors_at_zero():

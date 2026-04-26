@@ -31,6 +31,16 @@ def test_double_jumps_over_stone():
     assert not state.grid[stone[0]][stone[1]].is_open
 
 
+def test_double_bounces_off_landing_stone():
+    landing = (HOME_RED[0] + 2, HOME_RED[1])
+    state = make_state(cells={landing: CellType.STONE})
+    state.players[Color.RED].abilities.add(Ability.DOUBLE)
+    apply_move(state, color=Color.RED, direction=Direction.DOWN)
+    assert state.players[Color.RED].pos == HOME_RED
+    assert state.grid[landing[0]][landing[1]].is_open
+    assert state.turn == Color.BLUE
+
+
 def test_fly_to_any_non_stone():
     state = make_state()
     state.players[Color.RED].abilities.add(Ability.FLY)

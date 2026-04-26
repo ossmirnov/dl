@@ -169,10 +169,8 @@ def apply_move(
         raise ValueError('move out of bounds')
 
     if is_stone(state.grid, target):
-        if used_double:
-            raise ValueError('cannot land on stone with double')
         _open_cell(state, target)
-        _emit(state, 'bounced', actor=color.value, pos=list(target))
+        _emit(state, 'bounced', actor=color.value, pos=list(target), used_double=used_double)
         _advance_turn(state)
         return
 

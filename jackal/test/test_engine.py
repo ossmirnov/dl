@@ -161,6 +161,23 @@ def test_wizard_refires_on_revisit():
     assert state.grid[5][6].is_open
 
 
+def test_teleport_opens_and_activates_landing():
+    teleport_pos = (HOME_RED[0] + 1, HOME_RED[1])
+    state = make_state(
+        cells={
+            teleport_pos: CellType.TELEPORT,
+            (8, 0): CellType.MONEY,
+            (8, 1): CellType.STONE,
+            (9, 1): CellType.STONE,
+        },
+    )
+    apply_move(state, color=Color.RED, direction=Direction.DOWN)
+    assert state.players[Color.RED].pos == (8, 0)
+    assert state.grid[8][0].is_open
+    assert state.grid[8][0].revealed_value > 0
+    assert state.players[Color.RED].balance == state.grid[8][0].revealed_value
+
+
 def test_wrong_turn_rejected():
     state = make_state()
     with pytest.raises(ValueError):

@@ -184,18 +184,30 @@ def apply_move(
 
 
 def _activate_landing(state: GameState, actor: Color) -> None:
+    _activate_one(state, actor, allow_recurse=True)
+
+
+def _activate_one(state: GameState, actor: Color, *, allow_recurse: bool) -> None:
     me = state.players[actor]
+    pos_before = me.pos
     cell = state.grid[me.pos[0]][me.pos[1]]
     opened = _open_cell(state, me.pos)
     if opened:
         cascade = _trigger_effect(state, actor=actor, cell_pos=me.pos)
         if cell.type == CellType.WIZARD:
             _wizard_cascade(state, actor=actor, targets=cascade)
-        return
-    if cell.type == CellType.TUNNEL:
+    elif cell.type == CellType.TUNNEL:
         _trigger_effect(state, actor=actor, cell_pos=me.pos)
     elif cell.type == CellType.WIZARD:
         cascade = _trigger_effect(state, actor=actor, cell_pos=me.pos)
         _wizard_cascade(state, actor=actor, targets=cascade)
+
+    if not allow_recurse:
+        return
+    if me.pos == pos_before:
+        return
+    if state.grid[me.pos[0]][me.pos[1]].is_open:
+        return
+    _activate_one(state, actor, allow_recurse=False)
 
 

@@ -131,6 +131,26 @@ def test_off_board_rejected():
         apply_move(state, color=Color.RED, direction=Direction.UP)
 
 
+def test_wizard_refires_on_revisit():
+    wizard_pos = (5, 5)
+    state = make_state(
+        cells={
+            wizard_pos: CellType.WIZARD,
+            (4, 5): CellType.MONEY,
+            (5, 4): CellType.MONEY,
+            (5, 6): CellType.MONEY,
+            (6, 5): CellType.MONEY,
+        },
+        red_pos=(4, 5),
+        open_cells={wizard_pos, (4, 5)},
+    )
+    apply_move(state, color=Color.RED, direction=Direction.DOWN)
+    assert state.players[Color.RED].pos == wizard_pos
+    assert state.grid[6][5].is_open
+    assert state.grid[5][4].is_open
+    assert state.grid[5][6].is_open
+
+
 def test_wrong_turn_rejected():
     state = make_state()
     with pytest.raises(ValueError):

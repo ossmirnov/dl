@@ -196,5 +196,8 @@ def _activate_landing(state: GameState, actor: Color) -> None:
         return
     if cell.type == CellType.TUNNEL:
         _trigger_effect(state, actor=actor, cell_pos=me.pos)
+    elif cell.type == CellType.WIZARD:
+        cascade = _trigger_effect(state, actor=actor, cell_pos=me.pos)
+        _wizard_cascade(state, actor=actor, targets=cascade)
 
 

@@ -2,6 +2,7 @@
 <html lang='en'>
 <head>
   <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover'>
   <title>Jackal — game</title>
   <link rel='stylesheet' href='/static/style.css'>
 </head>
@@ -32,12 +33,20 @@
   </header>
 
   <main>
-    <canvas id='board' width='600' height='600' tabindex='0'></canvas>
+    <div class='board-wrap'>
+      <canvas id='board' width='600' height='600' tabindex='0'></canvas>
+    </div>
     <aside class='log' id='log'></aside>
   </main>
 
   <footer class='controls'>
-    <p>Arrow keys / WASD or click a cell to move. While flying, click any non-stone cell.</p>
+    <div class='dpad' id='dpad'>
+      <button class='up' data-dir='up' aria-label='up'>↑</button>
+      <button class='left' data-dir='left' aria-label='left'>←</button>
+      <button class='right' data-dir='right' aria-label='right'>→</button>
+      <button class='down' data-dir='down' aria-label='down'>↓</button>
+    </div>
+    <p>Arrow keys / WASD, on-screen pad, or tap a cell to move. While flying, tap any non-stone cell.</p>
     <p id='banner' class='banner hidden'></p>
     <button id='rematch' class='hidden'>Rematch</button>
   </footer>

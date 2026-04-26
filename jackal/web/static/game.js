@@ -311,8 +311,10 @@ window.addEventListener('keydown', (e) => {
 canvas.addEventListener('click', (e) => {
   if (!state || !isMyTurn()) return;
   const rect = canvas.getBoundingClientRect();
-  const c = Math.floor((e.clientX - rect.left) / CELL);
-  const r = Math.floor((e.clientY - rect.top) / CELL);
+  const sx = canvas.width / rect.width;
+  const sy = canvas.height / rect.height;
+  const c = Math.floor((e.clientX - rect.left) * sx / CELL);
+  const r = Math.floor((e.clientY - rect.top) * sy / CELL);
   if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return;
   if (myFlying()) {
     send({type: 'fly', r, c});
@@ -328,6 +330,15 @@ canvas.addEventListener('click', (e) => {
       return;
     }
   }
+});
+
+document.querySelectorAll('#dpad button').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!isMyTurn()) return;
+    const dir = btn.dataset.dir;
+    if (dir) send({type: 'move', dir});
+  });
 });
 
 elRematch.addEventListener('click', () => {

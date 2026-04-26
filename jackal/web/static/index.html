@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>Jackal — lobby</title>
+  <link rel='stylesheet' href='/static/style.css'>
+</head>
+<body class='lobby'>
+  <main class='card'>
+    <h1>Jackal</h1>
+    <p class='lead'>Two-player treasure hunt on a 10×10 island. First to 100 coins wins.</p>
+
+    <section>
+      <h2>Create a room</h2>
+      <form id='create-form'>
+        <label>Optional seed: <input type='number' id='seed' placeholder='random'></label>
+        <button type='submit'>Create</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Join a room</h2>
+      <form id='join-form'>
+        <label>Room ID: <input type='text' id='room-id' required></label>
+        <button type='submit'>Join</button>
+      </form>
+    </section>
+
+    <p class='hint'>Share the room URL with the second player. The first two browsers to join become the red and blue players. Anyone else watches.</p>
+  </main>
+  <script src='/static/lobby.js'></script>
+</body>
+</html>

@@ -48,11 +48,22 @@ def test_fly_to_any_non_stone():
     assert state.players[Color.RED].pos == (4, 4)
 
 
-def test_fly_rejects_stone():
+def test_fly_onto_closed_stone_opens_and_bounces():
     state = make_state(cells={(4, 4): CellType.STONE})
+    state.players[Color.RED].abilities.add(Ability.FLY)
+    apply_move(state, color=Color.RED, fly_to=(4, 4))
+    assert state.players[Color.RED].pos == HOME_RED
+    assert state.grid[4][4].is_open
+    assert state.turn == Color.BLUE
+
+
+def test_fly_onto_open_stone_rejected():
+    state = make_state(cells={(4, 4): CellType.STONE}, open_cells={(4, 4)})
     state.players[Color.RED].abilities.add(Ability.FLY)
     with pytest.raises(ValueError):
         apply_move(state, color=Color.RED, fly_to=(4, 4))
+    assert state.players[Color.RED].pos == HOME_RED
+    assert state.turn == Color.RED
 
 
 def test_fly_requires_ability():

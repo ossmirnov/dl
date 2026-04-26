@@ -142,10 +142,16 @@ def apply_move(
             raise ValueError('cannot specify both direction and fly_to')
         if not in_bounds(fly_to):
             raise ValueError('fly target out of bounds')
-        if is_stone(state.grid, fly_to):
-            raise ValueError('cannot fly onto stone')
         if fly_to == me.pos:
             raise ValueError('fly target must differ from current position')
+        if is_stone(state.grid, fly_to):
+            target_cell = state.grid[fly_to[0]][fly_to[1]]
+            if target_cell.is_open:
+                raise ValueError('cannot fly onto stone')
+            _open_cell(state, fly_to)
+            _emit(state, 'bounced', actor=color.value, pos=list(fly_to), used_double=False)
+            _advance_turn(state)
+            return
         me.pos = fly_to
         _emit(state, 'flew', actor=color.value, pos=list(fly_to))
         _activate_landing(state, color)

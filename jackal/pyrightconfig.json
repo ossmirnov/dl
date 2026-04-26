@@ -1,0 +1,7 @@
+{
+    "include": ["server", "game", "test"],
+    "exclude": ["**/__pycache__", "log", "web"],
+    "pythonVersion": "3.12",
+    "typeCheckingMode": "basic",
+    "reportMissingTypeStubs": false
+}

@@ -1,0 +1,12 @@
+services:
+  jackal:
+    build: .
+    container_name: jackal
+    restart: unless-stopped
+    ports:
+      - '${JACKAL_PORT:-8080}:8080'
+    volumes:
+      - ./log:/app/log
+      - ./web/media:/app/web/media
+    environment:
+      JACKAL_PORT: 8080

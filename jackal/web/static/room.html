@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover'>
+  <title>Jackal — game</title>
+  <link rel='stylesheet' href='/static/style.css'>
+</head>
+<body class='room'>
+  <header class='hud'>
+    <div class='hud-left'>
+      <span class='room-tag'>room <code id='room-id-tag'>?</code></span>
+      <span id='you-tag' class='you-tag'>connecting…</span>
+    </div>
+    <div class='players'>
+      <div class='player-card red' id='card-red'>
+        <span class='dot' id='dot-red'></span>
+        <span class='name'>red</span>
+        <span class='balance' id='bal-red'>0</span>
+        <span class='abilities' id='ab-red'></span>
+      </div>
+      <div class='turn-status' id='turn-status'>
+        <div class='turn-arrow' id='turn-arrow'>→</div>
+        <div class='turn-text' id='turn-text'>—</div>
+      </div>
+      <div class='player-card blue' id='card-blue'>
+        <span class='dot' id='dot-blue'></span>
+        <span class='name'>blue</span>
+        <span class='balance' id='bal-blue'>0</span>
+        <span class='abilities' id='ab-blue'></span>
+      </div>
+    </div>
+    <div class='hud-right'>
+      <span id='conn-tag' class='conn'>•</span>
+    </div>
+  </header>
+
+  <main>
+    <div class='board-wrap'>
+      <canvas id='board' width='600' height='600' tabindex='0'></canvas>
+    </div>
+    <aside class='log' id='log'></aside>
+  </main>
+
+  <footer class='controls'>
+    <div class='dpad' id='dpad'>
+      <button class='up' data-dir='up' aria-label='up'>↑</button>
+      <button class='left' data-dir='left' aria-label='left'>←</button>
+      <button class='right' data-dir='right' aria-label='right'>→</button>
+      <button class='down' data-dir='down' aria-label='down'>↓</button>
+    </div>
+    <p>Arrow keys / WASD, on-screen pad, or tap a cell to move. While flying, tap any non-stone cell.</p>
+    <p id='banner' class='banner hidden'></p>
+    <button id='rematch' class='hidden'>Rematch</button>
+  </footer>
+
+  <script src='/static/game.js'></script>
+</body>
+</html>

@@ -45,7 +45,7 @@ def _parse_pos(payload: dict[str, Any]) -> tuple[int, int]:
     return (int(payload['r']), int(payload['c']))
 
 
-async def handle_socket(ws: WebSocket, room_id: str) -> None:
+async def handle_socket(ws: WebSocket, room_id: str, session_id: str) -> None:
     await ws.accept()
     room = registry.get(room_id)
     if room is None:
@@ -53,9 +53,23 @@ async def handle_socket(ws: WebSocket, room_id: str) -> None:
         await ws.close()
         return
 
-    color = registry.assign_color(room, ws)
+    old = registry.find_old_socket(room, session_id=session_id, exclude=ws)
+    if old is not None:
+        try:
+            await old.close(code=4000, reason='reconnected')
+        except Exception:
+            pass
+        registry.release(room, old)
+        log.info('ws kicked old socket room_id=%s session=%s', room_id, session_id[:8])
+
+    color = registry.assign_color(room, ws=ws, session_id=session_id)
     room.sockets.append(ws)
-    log.info('ws joined room_id=%s color=%s', room_id, color.value if color else 'spectator')
+    log.info(
+        'ws joined room_id=%s color=%s session=%s',
+        room_id,
+        color.value if color else 'spectator',
+        session_id[:8],
+    )
     await ws.send_json({'type': 'assigned', 'color': color.value if color else 'spectator'})
     await _send_state(room)
 

@@ -63,4 +63,8 @@ async def create_room(req: Request) -> JSONResponse:
 
 @app.websocket('/ws/{room_id}')
 async def ws_route(websocket: WebSocket, room_id: str) -> None:
-    await handle_socket(websocket, room_id)
+    session_id = websocket.query_params.get('session', '').strip()
+    if not session_id:
+        await websocket.close(code=4001)
+        return
+    await handle_socket(websocket, room_id, session_id)

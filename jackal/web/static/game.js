@@ -99,32 +99,60 @@ let me = null;
 let displayPos = {red: null, blue: null};
 let animating = false;
 
-const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-const ws = new WebSocket(`${proto}//${location.host}/ws/${roomId}`);
+const sessionKey = `jackal_session_${roomId}`;
+let sessionId = localStorage.getItem(sessionKey);
+if (!sessionId) {
+  sessionId = (crypto.randomUUID && crypto.randomUUID()) ||
+    (Date.now().toString(36) + Math.random().toString(36).slice(2));
+  localStorage.setItem(sessionKey, sessionId);
+}
 
-ws.addEventListener('open', () => {
-  elConn.classList.add('ok');
-  elConn.title = 'connected';
-});
-ws.addEventListener('close', () => {
-  elConn.classList.remove('ok');
-  elConn.title = 'disconnected';
-  appendLog('disconnected', 'error');
-});
-ws.addEventListener('error', () => appendLog('connection error', 'error'));
-ws.addEventListener('message', (ev) => {
-  const m = JSON.parse(ev.data);
-  if (m.type === 'assigned') {
-    me = m.color;
-    elYou.textContent = me === 'spectator' ? 'spectating' : `you are ${me}`;
-  } else if (m.type === 'state') {
-    onState(m.state);
-  } else if (m.type === 'events') {
-    for (const e of m.events) appendEvent(e);
-  } else if (m.type === 'error') {
-    appendLog(`error: ${m.message}`, 'error');
-  }
-});
+const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+let ws = null;
+let reconnectDelay = 500;
+
+function connect() {
+  ws = new WebSocket(`${proto}//${location.host}/ws/${roomId}?session=${encodeURIComponent(sessionId)}`);
+  ws.addEventListener('open', () => {
+    elConn.classList.add('ok');
+    elConn.title = 'connected';
+    reconnectDelay = 500;
+  });
+  ws.addEventListener('close', (e) => {
+    elConn.classList.remove('ok');
+    elConn.title = 'disconnected';
+    if (e.code === 4000) {
+      appendLog('replaced by another tab', 'error');
+      return;
+    }
+    if (e.code === 4001) {
+      appendLog('missing session id; reload the page', 'error');
+      return;
+    }
+    appendLog(`disconnected, reconnecting in ${reconnectDelay}ms`, 'error');
+    setTimeout(connect, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, 10000);
+  });
+  ws.addEventListener('error', () => appendLog('connection error', 'error'));
+  ws.addEventListener('message', (ev) => {
+    const m = JSON.parse(ev.data);
+    if (m.type === 'assigned') {
+      me = m.color;
+      elYou.textContent = me === 'spectator' ? 'spectating' : `you are ${me}`;
+    } else if (m.type === 'state') {
+      onState(m.state);
+    } else if (m.type === 'events') {
+      for (const e of m.events) appendEvent(e);
+    } else if (m.type === 'error') {
+      appendLog(`error: ${m.message}`, 'error');
+    }
+  });
+}
+connect();
+
+function send(obj) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+}
 
 function onState(s) {
   const prev = state;
@@ -277,7 +305,7 @@ window.addEventListener('keydown', (e) => {
   const dir = KEY_DIR[e.key];
   if (!dir || !isMyTurn()) return;
   e.preventDefault();
-  ws.send(JSON.stringify({type: 'move', dir}));
+  send({type: 'move', dir});
 });
 
 canvas.addEventListener('click', (e) => {
@@ -287,7 +315,7 @@ canvas.addEventListener('click', (e) => {
   const r = Math.floor((e.clientY - rect.top) / CELL);
   if (r < 0 || r >= SIZE || c < 0 || c >= SIZE) return;
   if (myFlying()) {
-    ws.send(JSON.stringify({type: 'fly', r, c}));
+    send({type: 'fly', r, c});
     return;
   }
   const meState = state.players[me];
@@ -296,14 +324,14 @@ canvas.addEventListener('click', (e) => {
   for (const [dir, [ddr, ddc]] of Object.entries(DELTA)) {
     const step = state.players[me].abilities.includes('double') ? 2 : 1;
     if (dr === ddr * step && dc === ddc * step) {
-      ws.send(JSON.stringify({type: 'move', dir}));
+      send({type: 'move', dir});
       return;
     }
   }
 });
 
 elRematch.addEventListener('click', () => {
-  ws.send(JSON.stringify({type: 'rematch'}));
+  send({type: 'rematch'});
 });
 
 draw();

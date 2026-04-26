@@ -2,6 +2,19 @@ const createForm = document.getElementById('create-form');
 const joinForm = document.getElementById('join-form');
 const seedInput = document.getElementById('seed');
 const roomIdInput = document.getElementById('room-id');
+const warning = document.getElementById('warning');
+
+const params = new URLSearchParams(location.search);
+const err = params.get('error');
+if (err === 'room_not_found') {
+  const id = (params.get('id') || '').toUpperCase();
+  warning.textContent = id
+    ? `Room ${id} not found. It may have expired or never existed.`
+    : 'That room was not found.';
+  warning.classList.remove('hidden');
+  if (id) roomIdInput.value = id;
+  history.replaceState({}, '', '/');
+}
 
 createForm.addEventListener('submit', async (e) => {
   e.preventDefault();

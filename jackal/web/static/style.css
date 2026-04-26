@@ -44,6 +44,15 @@ body.lobby {
 }
 .card button:hover { background: #4f8efb; }
 .hint { margin-top: 24px; color: #99a7b8; font-size: 12px; }
+.warning {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #3b1f1f;
+  border: 1px solid #ef4444;
+  color: #fecaca;
+  font-size: 14px;
+}
 
 body.room {
   display: flex;

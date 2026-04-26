@@ -3,8 +3,9 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from urllib.parse import quote
 
 from . import settings
 from .logging_setup import configure_logging
@@ -26,6 +27,15 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan, title='Jackal')
 
 
+@app.middleware('http')
+async def no_cache_assets(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path.startswith('/static/') or path == '/' or path.startswith('/room/'):
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return response
+
+
 settings.MEDIA_DIR.mkdir(parents=True, exist_ok=True)
 app.mount('/media', StaticFiles(directory=str(settings.MEDIA_DIR)), name='media')
 app.mount('/static', StaticFiles(directory=str(settings.WEB_DIR)), name='static')
@@ -37,9 +47,12 @@ async def index() -> FileResponse:
 
 
 @app.get('/room/{room_id}')
-async def room_page(room_id: str) -> FileResponse:
+async def room_page(room_id: str):
     if registry.get(room_id) is None:
-        raise HTTPException(status_code=404, detail='room not found')
+        return RedirectResponse(
+            url=f'/?error=room_not_found&id={quote(room_id)}',
+            status_code=303,
+        )
     return FileResponse(settings.WEB_DIR / 'room.html')
 
 
